@@ -10,6 +10,7 @@
     <UseGlobalApplicationHostFile />
     <LastActiveSolutionConfig>Debug|Any CPU</LastActiveSolutionConfig>
     <ActiveDebugTarget>ContainerToolsProjectDebugExtension</ActiveDebugTarget>
+    <ProjectView>ShowAllFiles</ProjectView>
   </PropertyGroup>
   <ProjectExtensions>
     <VisualStudio>

@@ -1,17 +1,21 @@
 #Depending on the operating system of the host machines(s) that will build or run the containers, the image specified in the FROM statement may need to be changed.
 #For more information, please see https://aka.ms/containercompat 
 
-FROM mcr.microsoft.com/dotnet/framework/aspnet:4.8-windowsservercore-ltsc2019 AS build
+FROM mcr.microsoft.com/dotnet/framework/sdk:4.8 AS build
 WORKDIR /app
 
 COPY *.sln .
 COPY *.csproj ./aspnetapp/
 COPY *config ./aspnetapp/
-RUN nuget restore 
+RUN nuget restore
 
 COPY . ./aspnetapp/
 WORKDIR /app/aspnetapp
 RUN msbuild /p:Configuration=Release -r:False
+
+FROM mcr.microsoft.com/dotnet/framework/aspnet:4.8-windowsservercore-ltsc2019 AS runtime
+WORKDIR /inetpub/wwwroot
+EXPOSE 80
 
 ARG TRACER_VERSION=1.29.0
 ENV DD_TRACER_VERSION=$TRACER_VERSION
@@ -27,8 +31,5 @@ RUN Write-Host "Downloading Datadog .NET Tracer v$env:DD_TRACER_VERSION" ;\
     Write-Host 'Datadog .NET Tracer installed, removing installer file' ; \
 	Remove-Item 'datadog-apm.msi' ;
 
-FROM mcr.microsoft.com/dotnet/framework/aspnet:4.8-windowsservercore-ltsc2019 AS runtime
-EXPOSE 80
-WORKDIR /inetpub/wwwroot
 COPY --from=build /app/aspnetapp/. ./
 ENTRYPOINT ["powershell.exe", "C:\\inetpub\\wwwroot\\Startup.ps1"]
